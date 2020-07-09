@@ -10,6 +10,7 @@ import tensorflow.serving.PredictionServiceGrpc;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Application {
     public static void main(String[] args) {
@@ -26,18 +27,20 @@ public class Application {
         // 设置入参,访问默认是最新版本，如果需要特定版本可以使用tensorProtoBuilder.setVersionNumber方法
         List<Float> input = Arrays.asList(13f, 45f, 13f, 13f, 49f, 1f, 49f, 196f, 594f, 905f, 48f, 231f, 318f, 712f, 1003f, 477f, 259f, 291f, 287f, 161f, 65f, 62f, 82f, 68f, 2f, 10f);
         TensorProto.Builder inputTensorProto = TensorProto.newBuilder();
-        inputTensorProto.setDtype(DataType.DT_FLOAT);
+        inputTensorProto.setDtype(DataType.DT_INT32);
         inputTensorProto.addAllFloatVal(input);
         TensorShapeProto.Builder inputShapeBuilder = TensorShapeProto.newBuilder();
-        inputShapeBuilder.addDim(TensorShapeProto.Dim.newBuilder().setSize(1));
         inputShapeBuilder.addDim(TensorShapeProto.Dim.newBuilder().setSize(1));
         inputShapeBuilder.addDim(TensorShapeProto.Dim.newBuilder().setSize(input.size()));
         inputTensorProto.setTensorShape(inputShapeBuilder.build());
 
         int dropout = 1;
         TensorProto.Builder dropoutTensorProto = TensorProto.newBuilder();
-        dropoutTensorProto.setDtype(DataType.DT_INT32);
+        dropoutTensorProto.setDtype(DataType.DT_FLOAT);
         dropoutTensorProto.addIntVal(dropout);
+        TensorShapeProto.Builder dropoutShapeBuilder = TensorShapeProto.newBuilder();
+        dropoutShapeBuilder.addDim(TensorShapeProto.Dim.newBuilder().setSize(1));
+        dropoutTensorProto.setTensorShape(dropoutShapeBuilder.build());
 
         List<Integer> seqLength = Collections.singletonList(26);
         TensorProto.Builder seqLengthTensorProto = TensorProto.newBuilder();
@@ -47,13 +50,14 @@ public class Application {
         seqLengthShapeBuilder.addDim(TensorShapeProto.Dim.newBuilder().setSize(1));
         seqLengthTensorProto.setTensorShape(seqLengthShapeBuilder.build());
 
-        predictRequestBuilder.putInputs("input", dropoutTensorProto.build());
-        predictRequestBuilder.putInputs("drop_out", inputTensorProto.build());
+        predictRequestBuilder.putInputs("input", inputTensorProto.build());
+        predictRequestBuilder.putInputs("drop_out", dropoutTensorProto.build());
         predictRequestBuilder.putInputs("sequence_length", seqLengthTensorProto.build());
 
         // 访问并获取结果
         Predict.PredictResponse predictResponse = stub.predict(predictRequestBuilder.build());
-        org.tensorflow.framework.TensorProto result = predictResponse.toBuilder().getOutputsOrThrow("output");
-        System.out.println("预测值是:"+result.getFloatValList());
+        Map<String, TensorProto> result = predictResponse.getOutputsMap();
+        // CRF模型结果，发射矩阵和概率矩阵
+        System.out.println("预测值是:" + result.toString());
     }
 }

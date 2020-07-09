@@ -1,7 +1,5 @@
 from grpc.beta import implementations
 import tensorflow as tf
-from tensorflow.core.framework import tensor_pb2
-import numpy as np
 
 from tensorflow_serving.apis import predict_pb2, prediction_service_pb2_grpc
 
