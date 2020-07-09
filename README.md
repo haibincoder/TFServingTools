@@ -1,6 +1,8 @@
 # tf_tools
 
-blog:[https://www.cnblogs.com/bincoding/p/13266685.html](https://www.cnblogs.com/bincoding/p/13266685.html)
+blog: 
+[tfserving部署模型](https://www.cnblogs.com/bincoding/p/13266685.html)
+[通过grpc调用tfserving模型（python+java）](https://www.cnblogs.com/bincoding/p/13274948.html)
 
 下载docker image:
 docker pull tensorflow/serving
