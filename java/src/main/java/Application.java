@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class Application {
     public static void main(String[] args) {
@@ -55,7 +56,7 @@ public class Application {
         predictRequestBuilder.putInputs("sequence_length", seqLengthTensorProto.build());
 
         // 访问并获取结果
-        Predict.PredictResponse predictResponse = stub.predict(predictRequestBuilder.build());
+        Predict.PredictResponse predictResponse = stub.withDeadlineAfter(3, TimeUnit.SECONDS).predict(predictRequestBuilder.build());
         Map<String, TensorProto> result = predictResponse.getOutputsMap();
         // CRF模型结果，发射矩阵和概率矩阵
         System.out.println("预测值是:" + result.toString());
